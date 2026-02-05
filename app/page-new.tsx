@@ -18,6 +18,8 @@ export default async function Home() {
   const featuredFilm = films[0];
   const trendingFilms = films.slice(0, 8);
   const newFilms = films.slice(8, 16);
+  const dramaFilms = films.filter((f) => f.genre === "Drama").slice(0, 8);
+  const docFilms = films.filter((f) => f.genre === "Documentary").slice(0, 8);
 
   return (
     <main className="min-h-screen bg-dark-950">

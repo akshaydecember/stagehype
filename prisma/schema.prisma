@@ -1,0 +1,93 @@
+// ===============================
+// STAGEHYPE – PRISMA SCHEMA
+// Prisma v7 (Stable)
+// ===============================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// This tells Prisma to run the seed script after migrations
+// Run with: npx prisma db seed or npm run seed
+
+enum UserRole {
+  VIEWER
+  ARTIST
+  ADMIN
+  MODERATOR
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  role      UserRole @default(VIEWER)
+  createdAt DateTime @default(now())
+
+  artistProfile ArtistProfile?
+  donations     Donation[]
+}
+
+model ArtistProfile {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  displayName String
+  bio         String?
+  skills      String?
+  createdAt   DateTime @default(now())
+
+  user      User           @relation(fields: [userId], references: [id])
+  credits   FilmCredit[]
+  donations Donation[]
+}
+
+model Film {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  genre       String
+  mood        String
+  year        Int
+  durationMin Int
+  language    String
+  isApproved  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  credits   FilmCredit[]
+  donations Donation[]
+}
+
+model FilmCredit {
+  id       String @id @default(uuid())
+  filmId   String
+  artistId String
+  role     String
+
+  film   Film          @relation(fields: [filmId], references: [id])
+  artist ArtistProfile @relation(fields: [artistId], references: [id])
+
+  @@index([filmId])
+  @@index([artistId])
+}
+
+model Donation {
+  id          String   @id @default(uuid())
+  amount      Float
+  platformFee Float
+  createdAt   DateTime @default(now())
+
+  userId   String
+  filmId   String?
+  artistId String
+
+  user   User          @relation(fields: [userId], references: [id])
+  film   Film?         @relation(fields: [filmId], references: [id])
+  artist ArtistProfile @relation(fields: [artistId], references: [id])
+
+  @@index([userId])
+  @@index([artistId])
+}
